@@ -5,6 +5,53 @@
 
 #include "lexer.h"
 #include "ast.h"
+#include "op.h"
+
+int jaz_ast_variable_cmp(hlist_node_t *node1, hlist_node_t *node2)
+{
+    struct jaz_ast_variable *var1 = container_of(node1, struct jaz_ast_variable, node);
+    struct jaz_ast_variable *var2 = container_of(node2, struct jaz_ast_variable, node);
+    return strcmp(var1->id, var2->id);
+}
+
+int jaz_ast_variable_hash(hlist_node_t *node, int max)
+{
+    struct jaz_ast_variable *var = container_of(node, struct jaz_ast_variable, node);
+    char *c;
+    int hash = 0;
+
+    for (c = var->id; *c; c++)
+        hash += *c;
+
+    return hash % max;
+}
+
+void jaz_ast_variable_free(hlist_node_t *node)
+{
+    struct jaz_ast_variable *var = container_of(node, struct jaz_ast_variable, node);
+
+    free(var->id);
+    free(var);
+}
+
+struct jaz_ast_scope *jaz_ast_new_scope(void)
+{
+    struct jaz_ast_scope *scope = malloc(sizeof(*scope));
+    memset(scope, 0, sizeof(*scope));
+
+    list_node_init(&scope->scope_entry);
+
+    scope->variable_table.cmp = jaz_ast_variable_cmp;
+    scope->variable_table.hash = jaz_ast_variable_hash;
+
+    return scope;
+}
+
+void jaz_ast_del_scope(struct jaz_ast_scope *scope)
+{
+    hashtable_clear(&scope->variable_table, jaz_ast_variable_free);
+    free(scope);
+}
 
 static const char *token_name(int tok)
 {
@@ -50,6 +97,8 @@ int jaz_ast_create(struct jaz_ast *ast, const char *file)
     yyin = filp;
     ret = yyparse(ast);
 
+    jaz_ast_resolve_labels(ast);
+
     fclose(filp);
     return ret;
 }
@@ -61,7 +110,7 @@ int jaz_ast_resolve_labels(struct jaz_ast *ast)
     list_foreach_entry(&ast->ast_list, entry, ast_entry) {
         struct jaz_ast_label_entry *label;
 
-        if (entry->op != TOK_GOTO && entry->op != TOK_GOTRUE && entry->op != TOK_GOFALSE)
+        if (entry->op != TOK_GOTO && entry->op != TOK_GOTRUE && entry->op != TOK_GOFALSE && entry->op != TOK_CALL)
             continue;
 
         entry->data.label = NULL;
@@ -91,70 +140,19 @@ void jaz_ast_print(struct jaz_ast *ast)
     }
 }
 
-#define jaz_ast_next_entry(ent) \
-    list_next_entry(ent, ast_entry)
-
-static struct jaz_ast_entry *jaz_ast_run_entry(struct jaz_ast *ast, struct jaz_ast_entry *entry)
-{
-    switch (entry->op) {
-    case TOK_GOTO:
-        return entry->data.label;
-
-    case TOK_PUSH:
-        ast->stack_top++;
-        *ast->stack_top = atoi(entry->data.param);
-        break;
-
-    case TOK_POP:
-        ast->stack_top--;
-        break;
-
-    case '+':
-        ast->stack_top[-1] = ast->stack_top[0] + ast->stack_top[-1];
-        ast->stack_top--;
-        break;
-
-    case '-':
-        ast->stack_top[-1] = ast->stack_top[0] - ast->stack_top[-1];
-        ast->stack_top--;
-        break;
-
-    case '*':
-        ast->stack_top[-1] = ast->stack_top[0] * ast->stack_top[-1];
-        ast->stack_top--;
-        break;
-
-    case '/':
-        ast->stack_top[-1] = ast->stack_top[0] / ast->stack_top[-1];
-        ast->stack_top--;
-        break;
-
-    case TOK_MOD:
-        ast->stack_top[-1] = ast->stack_top[0] % ast->stack_top[-1];
-        ast->stack_top--;
-        break;
-
-    case TOK_SHOW:
-        printf("%s\n", entry->data.param);
-        break;
-
-    case TOK_PRINT:
-        printf("%d\n", *ast->stack_top);
-        break;
-
-    default:
-        break;
-    }
-
-    return list_next_entry(entry, ast_entry);
-}
-
 void jaz_ast_run(struct jaz_ast *ast)
 {
     struct jaz_ast_entry *entry = list_first_entry(&ast->ast_list, struct jaz_ast_entry, ast_entry);
 
-    while (!list_ptr_is_head(&ast->ast_list, &(entry = jaz_ast_run_entry(ast, entry))->ast_entry))
-        ;
+    ast->halt = 0;
+
+    ast->lvalue_scope_depth = ast->rvalue_scope_depth = 0;
+    ast->lvalue_scope = ast->rvalue_scope = jaz_ast_new_scope();
+
+    list_add_tail(&ast->scope_list, &ast->lvalue_scope->scope_entry);
+
+    while (!ast->halt && !list_ptr_is_head(&ast->ast_list, &entry->ast_entry))
+        entry = (jaz_op_lookup_table[entry->op]) (ast, entry);
 
     return ;
 }

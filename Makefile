@@ -142,9 +142,11 @@ $(BIN):
 	@echo " LEX     $@"
 	$(Q)$(LEX) $(LFLAGS) -o $@ $<
 
-%.tab.c %.tab.h: %.y
-	@echo " YACC    $@"
-	$(Q)$(YACC) $(YFLAGS) -d -b $* $<
+src/%.tab.c include/%.tab.h: src/%.y
+	@echo " YACC    src/$*.tab.c include/$*.tab.h"
+	$(Q)$(YACC) $(YFLAGS) -d -b ./src/$* $<
+	$(Q)mkdir -p ./include/$*
+	$(Q)mv ./src/$*.tab.h ./include/$*.tab.h
 
 DEP_LIST := $(foreach dep,$(DEPS),$(dir $(dep)).$(notdir $(dep)))
 DEP_LIST := $(DEP_LIST:.o=.d)

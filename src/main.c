@@ -4,14 +4,19 @@
 
 #include "ast.h"
 
+static struct jaz_ast ast;
+
 int main(int argc, char **argv)
 {
-    struct jaz_ast ast;
     int ret;
+    const char *file = "./test4.jaz";
+
+    if (argc > 1)
+        file = argv[1];
 
     jaz_ast_init(&ast);
 
-    ret = jaz_ast_create(&ast, "./test2.jaz");
+    ret = jaz_ast_create(&ast, file);
 
     if (ret)
         return 0;

@@ -24,7 +24,7 @@ static struct jaz_ast_entry *jaz_ast_entry_new(int op, char *parameter);
 %locations
 
 %token <str> TOK_IDENT
-%type <str> show_ident_list
+%type  <str> show_ident_list
 
 %token TOK_LABEL TOK_GOTO TOK_GOFALSE TOK_GOTRUE
 %token TOK_PUSH TOK_POP
@@ -58,8 +58,8 @@ label:
      }
      ;
 
-show_ident_list: %empty {
-        $$ = strdup("");
+show_ident_list: TOK_IDENT {
+        $$ = strdup($1);
     }
     | show_ident_list TOK_IDENT {
         size_t len1 = strlen($1);
@@ -90,7 +90,9 @@ show_ident_list: %empty {
     ;
 
 show:
-    TOK_SHOW show_ident_list { $$ = jaz_ast_entry_new(TOK_SHOW, $2); };
+    TOK_SHOW show_ident_list { $$ = jaz_ast_entry_new(TOK_SHOW, $2); }
+    | TOK_SHOW               { $$ = jaz_ast_entry_new(TOK_SHOW, strdup("\n")); }
+    ;
 
 operation:
     label
@@ -128,6 +130,8 @@ operation:
 
 statement:
     operation '\n'
+    | operation TOK_EOF
+    ;
 
 jaz_file: %empty 
     | jaz_file '\n' /* Empty line */
@@ -159,3 +163,4 @@ static struct jaz_ast_entry *jaz_ast_entry_new(int op, char *parameter)
 
     return entry;
 }
+

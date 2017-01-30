@@ -7,16 +7,25 @@
 #include "ast.h"
 #include "parser.tab.h"
 
+extern YYLTYPE yylloc;
 #define YY_NO_INPUT
-#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno;
+
+#define YY_NO_INPUT
+
+#define YY_USER_ACTION { \
+        yylloc.first_line = yylloc.last_line = yylineno; \
+    }
 %}
 
 %option noyywrap
 %option yylineno
 
+%x show_string
+
 %%
 
-\n { return '\n'; }
+
+\r?\n { return '\n'; }
 
 [ \t]+ /* White space */
 
@@ -46,7 +55,7 @@
 "pop"     { return TOK_POP; }
 "push"    { return TOK_PUSH; }
 "goto"    { return TOK_GOTO; }
-"show"    { return TOK_SHOW; }
+"show"    { BEGIN(show_string); return TOK_SHOW; }
 "print"   { return TOK_PRINT; }
 "label"   { return TOK_LABEL; }
 
@@ -55,14 +64,24 @@
 "return" { return TOK_RETURN; }
 "call"   { return TOK_CALL; }
 
-[a-zA-Z0-9_\-]+ {
+<show_string>[^\n\r]+ {
+    /* We add one to strip off the leading space */
+    yylval.str = strdup(yytext + 1);
+    BEGIN(INITIAL);
+    return TOK_IDENT;
+}
+
+<show_string>\r?\n {
+    BEGIN(INITIAL);
+    return '\n';
+}
+
+[^ \t\n\r]+ {
     yylval.str = strdup(yytext);
     return TOK_IDENT;
 }
 
 <<EOF>> { return TOK_EOF; }
-
-. { return TOK_ERR; }
 
 %%
 
