@@ -20,10 +20,9 @@ extern YYLTYPE yylloc;
 %option noyywrap
 %option yylineno
 
-%x show_string
+%x argument
 
 %%
-
 
 \r?\n { return '\n'; }
 
@@ -47,31 +46,36 @@ extern YYLTYPE yylloc;
 
 "div"     { return TOK_MOD; }
 "halt"    { return TOK_HALT; }
-"gotrue"  { return TOK_GOTRUE; }
-"gofalse" { return TOK_GOFALSE; }
-"rvalue"  { return TOK_RVALUE; }
-"lvalue"  { return TOK_LVALUE; }
 "copy"    { return TOK_COPY; }
 "pop"     { return TOK_POP; }
-"push"    { return TOK_PUSH; }
-"goto"    { return TOK_GOTO; }
-"show"    { BEGIN(show_string); return TOK_SHOW; }
 "print"   { return TOK_PRINT; }
-"label"   { return TOK_LABEL; }
+"begin"   { return TOK_BEGIN; }
+"end"     { return TOK_END; }
+"return"  { return TOK_RETURN; }
 
-"begin"  { return TOK_BEGIN; }
-"end"    { return TOK_END; }
-"return" { return TOK_RETURN; }
-"call"   { return TOK_CALL; }
+ /* 
+  * When interpreting arguments, we go into a separate state. Arguments can be
+  * any arbitrary string until a newline, so we don't want to parse them using
+  * the above rules, which would split on spaces, keywords, and some symbols.
+  */
+"push"    { BEGIN(argument); return TOK_PUSH; }
+"rvalue"  { BEGIN(argument); return TOK_RVALUE; }
+"lvalue"  { BEGIN(argument); return TOK_LVALUE; }
+"goto"    { BEGIN(argument); return TOK_GOTO; }
+"gotrue"  { BEGIN(argument); return TOK_GOTRUE; }
+"gofalse" { BEGIN(argument); return TOK_GOFALSE; }
+"label"   { BEGIN(argument); return TOK_LABEL; }
+"call"    { BEGIN(argument); return TOK_CALL; }
+"show"    { BEGIN(argument); return TOK_SHOW; }
 
-<show_string>[^\n\r]+ {
+<argument>[^\n\r]+ {
     /* We add one to strip off the leading space */
     yylval.str = strdup(yytext + 1);
     BEGIN(INITIAL);
     return TOK_IDENT;
 }
 
-<show_string>\r?\n {
+<argument>\r?\n {
     BEGIN(INITIAL);
     return '\n';
 }

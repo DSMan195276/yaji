@@ -10,12 +10,9 @@ hlist_node_t *hashtable_lookup(struct hashtable *table, hlist_node_t *key)
     int hash = (table->hash) (key, HASHTABLE_MAX);
     hlist_node_t *list = table->table[hash];
 
-    for (; list; list = list->next) {
-        if (((table->cmp) (list, key)) == 0) {
-            struct jaz_ast_variable *var = container_of(list, struct jaz_ast_variable, node);
+    for (; list; list = list->next)
+        if (((table->cmp) (list, key)) == 0)
             return list;
-        }
-    }
 
     return NULL;
 }

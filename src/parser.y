@@ -24,7 +24,6 @@ static struct jaz_ast_entry *jaz_ast_entry_new(int op, char *parameter);
 %locations
 
 %token <str> TOK_IDENT
-%type  <str> show_ident_list
 
 %token TOK_LABEL TOK_GOTO TOK_GOFALSE TOK_GOTRUE
 %token TOK_PUSH TOK_POP
@@ -38,65 +37,37 @@ static struct jaz_ast_entry *jaz_ast_entry_new(int op, char *parameter);
 %token TOK_EOF TOK_ERR
 
 %type <ast_entry> operation statement
-%type <ast_entry> label show
+%type <ast_entry> label
 
 %start jaz_file
 
 %%
 
+ /*
+  * Labels are a special operation because besides creating an ast entry, they
+  * also create an entry in the label list.
+  *
+  * The label list is used later in a pass of the AST to resolve labels into
+  * pointesr to other AST entries.
+  */
 label:
     TOK_LABEL TOK_IDENT {
-        struct jaz_ast_label_entry *label = malloc(sizeof(*label));
+        struct jaz_label *label = malloc(sizeof(*label));
 
         $$ = jaz_ast_entry_new(TOK_LABEL, $2);
 
-        jaz_ast_label_entry_init(label);
+        memset(label, 0, sizeof(*label));
         label->id = strdup($2);
         label->location = $$;
 
-        list_add_tail(&ast->ast_label_list, &label->ast_label_entry);
-     }
-     ;
-
-show_ident_list: TOK_IDENT {
-        $$ = strdup($1);
+        jaz_label_table_add(&ast->label_table, label);
     }
-    | show_ident_list TOK_IDENT {
-        size_t len1 = strlen($1);
-        size_t len2 = strlen($2);
-        size_t total_len = len1 + 1 + len2 + 1;
-        
-        if (len1 == 0) {
-            free($1);
-            $$ = $2;
-            break;
-        }
-
-        char *result = malloc(total_len);
-        memset(result, 0, total_len);
-
-        memcpy(result, $1, len1);
-
-        result[len1] = ' ';
-        len1++;
-
-        memcpy(result + len1, $2, len2);
-
-        free($1);
-        free($2);
-
-        $$ = result;
-    }
-    ;
-
-show:
-    TOK_SHOW show_ident_list { $$ = jaz_ast_entry_new(TOK_SHOW, $2); }
-    | TOK_SHOW               { $$ = jaz_ast_entry_new(TOK_SHOW, strdup("\n")); }
     ;
 
 operation:
     label
-    | show
+    | TOK_SHOW TOK_IDENT     { $$ = jaz_ast_entry_new(TOK_SHOW,               $2); }
+    | TOK_SHOW               { $$ = jaz_ast_entry_new(TOK_SHOW,               strdup("\n")); }
     | TOK_GOTO TOK_IDENT     { $$ = jaz_ast_entry_new(TOK_GOTO,               $2); }
     | TOK_PUSH TOK_IDENT     { $$ = jaz_ast_entry_new(TOK_PUSH,               $2); }
     | TOK_POP                { $$ = jaz_ast_entry_new(TOK_POP,                NULL); }

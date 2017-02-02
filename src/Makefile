@@ -1,6 +1,9 @@
 
 objs-y += main.o
 objs-y += ast.o
+objs-y += vm.o
+objs-y += scope.o
+objs-y += label_table.o
 
 objs-y += compare_op.o
 objs-y += console_op.o
@@ -15,7 +18,7 @@ objs-y += op.o
 objs-y += hashtable.o
 
 clean-list-y += parser.tab.c
-clean-list-y += parser.tab.h
+CLEAN_LIST += ./include/parser.tab.h
 
 # Add extra dependency information
 #
@@ -25,10 +28,10 @@ clean-list-y += parser.tab.h
 $(tree)/parser.tab.c: $(tree)/parser.y
 $(tree)/parser.tab.h: $(tree)/parser.y
 include/ast.h: $(tree)/parser.y
-include/ast.h: $(tree)/parser.tab.h
+include/ast.h: include/parser.tab.h
 
-$(tree)/.main.d: $(tree)/parser.tab.h
-$(tree)/.lexer.d: $(tree)/parser.tab.h
+$(tree)/.main.d: include/parser.tab.h
+$(tree)/.lexer.d: include/parser.tab.h
 
 objs-y += parser.tab.o
 objs-y += lexer.o
