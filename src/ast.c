@@ -49,10 +49,10 @@ int jaz_ast_create(struct jaz_ast *ast, const char *file)
 
     yyin = filp;
     ret = yyparse(ast);
+    fclose(filp);
 
     jaz_ast_resolve_labels(ast);
 
-    fclose(filp);
     return ret;
 }
 
