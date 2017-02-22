@@ -5,14 +5,6 @@ objs-y += vm.o
 objs-y += scope.o
 objs-y += label_table.o
 
-objs-y += compare_op.o
-objs-y += console_op.o
-objs-y += control_flow_op.o
-objs-y += logical_op.o
-objs-y += math_op.o
-objs-y += stack_op.o
-objs-y += subroutine_op.o
-
 objs-y += op.o
 
 objs-y += hashtable.o
