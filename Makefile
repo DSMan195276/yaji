@@ -1,18 +1,18 @@
 include ./config.mk
 
 # Program wide settings
-EXE       := jizc
-EXEC      := JIZC
+EXE       := yaji
+EXEC      := YAJI
 PROG      := $(BIN)/$(EXE)
-JIZC_VERSION   := 0
-JIZC_SUBLEVEL  := 8
-JIZC_PATCH     := 0
-JIZC_VERSION_N := $(JIZC_VERSION).$(JIZC_SUBLEVEL).$(JIZC_PATCH)
+YAJI_VERSION   := 0
+YAJI_SUBLEVEL  := 8
+YAJI_PATCH     := 0
+YAJI_VERSION_N := $(YAJI_VERSION).$(YAJI_SUBLEVEL).$(YAJI_PATCH)
 
 LIBFLAGS :=
 
 CFLAGS  += -std=gnu99 -I'./include' \
-				-DJIZC_VERSION_N="$(JIZC_VERSION_N)"
+				-DYAJI_VERSION_N="$(YAJI_VERSION_N)"
 
 # 'tree' references the current directory later-on
 tree := .

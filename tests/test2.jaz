@@ -1,0 +1,31 @@
+
+show This is a test
+
+push 1
+push 2
++
+print
+pop
+
+push 1
+push 2
+-
+print
+pop
+
+push 5
+push 71771
+*
+print
+pop
+
+show Variable test
+lvalue var2
+push 5
+:=
+
+show Should be 5
+
+rvalue var2
+print
+
