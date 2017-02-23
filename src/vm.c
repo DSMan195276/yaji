@@ -25,7 +25,6 @@ void jaz_vm_run(struct jaz_vm *vm)
 
     initial_scope = jaz_vm_new_scope();
 
-    vm->lvalue_scope_depth = vm->rvalue_scope_depth = 0;
     vm->lvalue_scope = vm->rvalue_scope = initial_scope;
 
     list_add_tail(&vm->scope_list, &vm->lvalue_scope->scope_entry);

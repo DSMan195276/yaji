@@ -15,7 +15,6 @@ struct jaz_vm {
 
     list_head_t scope_list;
 
-    int lvalue_scope_depth, rvalue_scope_depth;
     struct jaz_vm_scope *lvalue_scope;
     struct jaz_vm_scope *rvalue_scope;
 
