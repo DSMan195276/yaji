@@ -53,6 +53,9 @@ int jaz_ast_create(struct jaz_ast *ast, const char *file)
 
     jaz_ast_resolve_labels(ast);
 
+    /* Clean-up memory from lexer */
+    yylex_destroy();
+
     return ret;
 }
 
