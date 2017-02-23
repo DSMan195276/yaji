@@ -24,6 +24,7 @@ int jaz_label_hash(hlist_node_t *node, int max)
 void jaz_label_free(hlist_node_t *node)
 {
     struct jaz_label *label = container_of(node, struct jaz_label, node);
+    free(label->id);
     free(label);
 }
 
