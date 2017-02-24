@@ -16,6 +16,8 @@ CFLAGS  += -std=gnu99 -I'./include' \
 
 # 'tree' references the current directory later-on
 tree := .
+tree-root := .
+tree-include := ./include
 
 # This is our default target - The default is the first target in the file so
 # we need to define this fairly high-up.

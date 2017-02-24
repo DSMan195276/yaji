@@ -10,7 +10,7 @@ objs-y += op.o
 objs-y += hashtable.o
 
 clean-list-y += parser.tab.c
-CLEAN_LIST += ./include/parser.tab.h
+CLEAN_LIST += $(tree-include)/parser.tab.h
 
 # Add extra dependency information
 #
@@ -20,10 +20,10 @@ CLEAN_LIST += ./include/parser.tab.h
 $(tree)/parser.tab.c: $(tree)/parser.y
 $(tree)/parser.tab.h: $(tree)/parser.y
 include/ast.h: $(tree)/parser.y
-include/ast.h: include/parser.tab.h
+include/ast.h: $(tree-include)/parser.tab.h
 
-$(tree)/.main.d: include/parser.tab.h
-$(tree)/.lexer.d: include/parser.tab.h
+$(tree)/.main.d: $(tree-include)/parser.tab.h
+$(tree)/.lexer.d: $(tree-include)/parser.tab.h
 
 objs-y += parser.tab.o
 objs-y += lexer.o
