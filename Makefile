@@ -9,7 +9,11 @@ YAJI_SUBLEVEL  := 8
 YAJI_PATCH     := 0
 YAJI_VERSION_N := $(YAJI_VERSION).$(YAJI_SUBLEVEL).$(YAJI_PATCH)
 
-LIBFLAGS :=
+ifeq ($(BITS),32)
+LIBFLAGS := -m32
+LDFLAGS := -m elf_i386
+CFLAGS  += -m32
+endif
 
 CFLAGS  += -std=gnu99 -I'./include' \
 				-DYAJI_VERSION_N="$(YAJI_VERSION_N)"
@@ -45,7 +49,7 @@ endif
 define create_link_rule
 $(1): $(2)
 	@echo " LD      $$@"
-	$$(Q)$$(LD) -r $(2) -o $$@
+	$$(Q)$$(LD) $$(LDFLAGS) -r $(2) -o $$@
 endef
 
 # Traverse into tree
@@ -102,7 +106,7 @@ real-all: $(PROG)
 
 $(PROG): ./src.o | $(BIN)
 	@echo " CCLD    $@"
-	$(Q)$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $< $(LIBFLAGS)
+	$(Q)$(CC) $(CFLAGS) -o $@ $< $(LIBFLAGS)
 
 install:
 	$(Q)mkdir -p $(BINDIR)

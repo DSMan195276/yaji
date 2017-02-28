@@ -1,3 +1,9 @@
+
+# Set this to 32 or 64 to create a 32-bit or 64-bit build
+#
+# Note: Clean the project after changing this
+BITS := 64
+
 # Compiler settings
 CC      ?= cc
 CFLAGS  += -Wall -std=gnu99 \

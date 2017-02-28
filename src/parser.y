@@ -67,7 +67,7 @@ label:
 operation:
     label
     | TOK_SHOW TOK_IDENT     { $$ = jaz_ast_entry_new(TOK_SHOW,               $2); }
-    | TOK_SHOW               { $$ = jaz_ast_entry_new(TOK_SHOW,               strdup("\n")); }
+    | TOK_SHOW               { $$ = jaz_ast_entry_new(TOK_SHOW,               strdup("")); }
     | TOK_GOTO TOK_IDENT     { $$ = jaz_ast_entry_new(TOK_GOTO,               $2); }
     | TOK_PUSH TOK_IDENT     { $$ = jaz_ast_entry_new(TOK_PUSH,               $2); }
     | TOK_POP                { $$ = jaz_ast_entry_new(TOK_POP,                NULL); }

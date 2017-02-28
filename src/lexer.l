@@ -44,14 +44,14 @@ extern YYLTYPE yylloc;
 "<"  { return '<'; }
 ">"  { return '>'; }
 
-"div"     { return TOK_MOD; }
-"halt"    { return TOK_HALT; }
-"copy"    { return TOK_COPY; }
-"pop"     { return TOK_POP; }
-"print"   { return TOK_PRINT; }
-"begin"   { return TOK_BEGIN; }
-"end"     { return TOK_END; }
-"return"  { return TOK_RETURN; }
+"div"    { return TOK_MOD; }
+"halt"   { return TOK_HALT; }
+"copy"   { return TOK_COPY; }
+"pop"    { return TOK_POP; }
+"print"  { return TOK_PRINT; }
+"begin"  { return TOK_BEGIN; }
+"end"    { return TOK_END; }
+"return" { return TOK_RETURN; }
 
  /* 
   * When interpreting arguments, we go into a separate state. Arguments can be

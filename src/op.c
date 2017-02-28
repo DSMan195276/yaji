@@ -155,6 +155,8 @@ static struct jaz_ast_entry *jaz_op_assign(struct jaz_vm *vm, struct jaz_ast_ent
     struct jaz_vm_variable *var = (struct jaz_vm_variable *)vm->stack_top[-1];
     intptr_t val = vm->stack_top[0];
 
+    printf("Assigning value: 0x%016lx(%ld)\n", val, val);
+
     var->value = val;
 
     vm->stack_top -= 2;
